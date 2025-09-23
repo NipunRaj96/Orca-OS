@@ -1,0 +1,92 @@
+Metadata-Version: 2.4
+Name: orca-os
+Version: 0.1.0
+Summary: AI-powered operating system wrapper for Linux
+Home-page: https://github.com/orca-os/orca
+Author: Orca OS Team
+Author-email: Orca OS Team <team@orca-os.dev>
+License: MIT
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: httpx>=0.24.0
+Requires-Dist: click>=8.0.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: ollama>=0.1.0
+Requires-Dist: transformers>=4.30.0
+Requires-Dist: torch>=2.0.0
+Requires-Dist: psutil>=5.9.0
+Requires-Dist: systemd-python>=235
+Requires-Dist: python-xlib>=0.33
+Requires-Dist: pynput>=1.7.0
+Requires-Dist: cryptography>=41.0.0
+Requires-Dist: jsonschema>=4.17.0
+Requires-Dist: sqlalchemy>=2.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.10.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Dynamic: author
+Dynamic: home-page
+Dynamic: requires-python
+
+# Orca OS - AI-Powered Linux Wrapper
+
+Orca OS is an AI-powered operating system wrapper for Linux that brings intelligent assistance to every system interaction. Think Cursor AI for VS Code, but for your entire operating system.
+
+## Architecture
+
+Orca wraps Linux with AI capabilities through:
+- **Background Daemon**: Systemd service managing AI requests and system integration
+- **Local LLM**: Privacy-first local model (LLaMA 8B) for command generation
+- **Global Hotkey**: Ctrl+Space overlay for instant AI assistance
+- **Safety First**: Policy engine, sandboxing, and audit trails
+- **CLI Interface**: `orca "query"` for scriptable AI assistance
+
+## Quick Start
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run CLI interface
+python -m orca "show me disk usage"
+
+# Start daemon (for hotkey overlay)
+sudo systemctl start orca-daemon
+```
+
+## Features
+
+- 🔒 **Privacy First**: All processing happens locally
+- 🛡️ **Safety Built-in**: Policy engine prevents dangerous commands
+- ⚡ **Fast**: Optimized for sub-second response times
+- 🔧 **Extensible**: Plugin system for app-specific handlers
+- 📊 **Auditable**: Complete command history and execution logs
+
+## Development Status
+
+- [x] Project structure
+- [ ] CLI interface
+- [ ] LLM integration
+- [ ] Policy engine
+- [ ] Context providers
+- [ ] Executor with sandboxing
+- [ ] Hotkey overlay
+- [ ] Testing framework
+
+## License
+
+MIT License - See LICENSE file for details

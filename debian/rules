@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	# Install Python package
+	dh_auto_install
+	
+	# Install systemd service
+	install -D -m 644 debian/orca-os.service debian/orca-os/etc/systemd/system/orca-os.service
+	
+	# Install configuration
+	install -D -m 644 config/orca.yaml debian/orca-os/etc/orca/orca.yaml
+	
+	# Install documentation
+	install -D -m 644 README.md debian/orca-os/usr/share/doc/orca-os/README.md
+
+override_dh_auto_build:
+	# No build step needed for Python package

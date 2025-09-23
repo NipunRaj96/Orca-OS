@@ -1,0 +1,18 @@
+Package: orca-os
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: python3 (>= 3.8), python3-pip, python3-venv, systemd, curl
+Maintainer: Orca OS Team <team@orca-os.dev>
+Description: AI-Powered Linux Operating System
+ Orca OS is an AI-powered operating system that provides natural language
+ interaction with your Linux system. It includes:
+ .
+  * Natural language command translation
+  * AI-powered system management
+  * Safe command execution with validation
+  * Background daemon service
+  * REST API for integration
+ .
+ This package provides the core Orca OS functionality for Ubuntu/Debian systems.

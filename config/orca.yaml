@@ -1,0 +1,26 @@
+# Orca OS Configuration
+
+# LLM Configuration
+llm:
+  base_url: "http://localhost:11434"  # Ollama default
+  model: "llama3.1:8b"                # Use LLaMA 3.1 8B for faster response
+  temperature: 0.1                    # Low temperature for consistency
+  max_tokens: 512                     # Reasonable response length
+  timeout: 30                         # 30 second timeout
+
+# Policy Configuration
+policy:
+  require_confirmation: true          # Always ask before executing
+  max_confidence_threshold: 0.8       # Require 80% confidence
+  sandbox_all_commands: true          # Sandbox all commands
+  default_action: "clarify"           # Default to clarification
+
+# Executor Configuration
+executor:
+  use_sandbox: true                   # Use systemd-run sandboxing
+  timeout: 30                         # 30 second execution timeout
+  max_output_size: 1048576           # 1MB max output
+
+# General Configuration
+log_level: "INFO"
+data_dir: "~/.orca"

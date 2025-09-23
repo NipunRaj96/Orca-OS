@@ -1,0 +1,40 @@
+#!/bin/bash
+set -e
+
+# Post-installation script for Orca OS
+
+echo "Setting up Orca OS..."
+
+# Create orca user if it doesn't exist
+if ! id "orca" &>/dev/null; then
+    useradd -r -s /bin/false -d /var/lib/orca orca
+    echo "Created orca system user"
+fi
+
+# Create directories
+mkdir -p /var/lib/orca
+mkdir -p /var/log/orca
+mkdir -p /etc/orca
+
+# Set permissions
+chown -R orca:orca /var/lib/orca
+chown -R orca:orca /var/log/orca
+chmod 755 /var/lib/orca
+chmod 755 /var/log/orca
+
+# Install Python dependencies
+cd /opt/orca-os
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Enable and start systemd service
+systemctl daemon-reload
+systemctl enable orca-os.service
+systemctl start orca-os.service
+
+echo "Orca OS installed successfully!"
+echo "Service is running on http://localhost:8080"
+echo "Use 'systemctl status orca-os' to check status"
+echo "Use 'systemctl restart orca-os' to restart"

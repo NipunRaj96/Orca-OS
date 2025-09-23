@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+# Pre-removal script for Orca OS
+
+echo "Stopping Orca OS service..."
+
+# Stop and disable service
+systemctl stop orca-os.service || true
+systemctl disable orca-os.service || true
+
+echo "Orca OS service stopped"

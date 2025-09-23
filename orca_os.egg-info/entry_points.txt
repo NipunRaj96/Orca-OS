@@ -1,0 +1,2 @@
+[console_scripts]
+orca = orca.cli:main

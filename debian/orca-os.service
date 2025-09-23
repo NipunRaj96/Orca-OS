@@ -1,0 +1,27 @@
+[Unit]
+Description=Orca OS - AI-Powered Linux Assistant
+Documentation=https://github.com/orca-os/orca-os
+After=network.target
+
+[Service]
+Type=simple
+User=orca
+Group=orca
+WorkingDirectory=/opt/orca-os
+Environment=PATH=/opt/orca-os/venv/bin
+ExecStart=/opt/orca-os/venv/bin/python -m orca --daemon --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=orca-os
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/orca /var/log/orca
+
+[Install]
+WantedBy=multi-user.target
