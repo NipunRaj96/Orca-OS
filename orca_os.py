@@ -60,9 +60,14 @@ class OrcaOS:
                 result = await self.executor.execute(final_suggestion)
                 
                 if result.success:
-                    return f"✅ Done! {final_suggestion.explanation}\n\nOutput:\n{result.stdout}"
+                    if result.stdout:
+                        return f"✅ Done! {final_suggestion.explanation}\n\nOutput:\n{result.stdout}"
+                    elif result.stderr:
+                        return f"⚠️ Command executed but no output. Error info:\n{result.stderr}"
+                    else:
+                        return f"✅ Done! {final_suggestion.explanation}\n\n(Command completed with no output)"
                 else:
-                    return f"❌ Error: {result.stderr}"
+                    return f"❌ Error (exit code {result.exit_code}): {result.stderr}"
             
             elif final_suggestion.action.value == "dry_run":
                 return f"🔍 Here's what I would do:\n\nCommand: {final_suggestion.command}\n\nExplanation: {final_suggestion.explanation}\n\nType 'yes' to execute, or ask me to modify it."

@@ -29,10 +29,10 @@ class LLMManager:
         self.client = httpx.AsyncClient(timeout=60.0)  # Increased timeout for larger model
         
         # LLM endpoint configuration
-        self.base_url = getattr(config, 'base_url', "http://localhost:11434")
-        self.model_name = getattr(config, 'model', "llama2:latest")
-        self.temperature = getattr(config, 'temperature', 0.1)
-        self.max_tokens = getattr(config, 'max_tokens', 512)
+        self.base_url = config.get('base_url', "http://localhost:11434") if isinstance(config, dict) else getattr(config, 'base_url', "http://localhost:11434")
+        self.model_name = config.get('model', "llama2:latest") if isinstance(config, dict) else getattr(config, 'model', "llama2:latest")
+        self.temperature = config.get('temperature', 0.1) if isinstance(config, dict) else getattr(config, 'temperature', 0.1)
+        self.max_tokens = config.get('max_tokens', 512) if isinstance(config, dict) else getattr(config, 'max_tokens', 512)
     
     async def generate_suggestion(
         self, 
