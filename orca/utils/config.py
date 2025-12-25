@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class LLMConfig(BaseModel):
     """LLM configuration."""
     base_url: str = "http://localhost:11434"
-    model: str = "llama2:latest"
+    model: str = "llama3.1:8b"  # Default to llama3.1:8b (fallback if config not found)
     temperature: float = 0.1
     max_tokens: int = 512
     timeout: int = 30
@@ -54,7 +54,7 @@ def load_config(config_path: Optional[str] = None) -> Config:
     config_data = {
         "llm": {
             "base_url": os.getenv("ORCA_LLM_URL", "http://localhost:11434"),
-            "model": os.getenv("ORCA_LLM_MODEL", "llama2:7b"),
+            "model": os.getenv("ORCA_LLM_MODEL", "llama3.1:8b"),
             "temperature": float(os.getenv("ORCA_LLM_TEMPERATURE", "0.1")),
             "max_tokens": int(os.getenv("ORCA_LLM_MAX_TOKENS", "512")),
             "timeout": int(os.getenv("ORCA_LLM_TIMEOUT", "30"))

@@ -3,7 +3,7 @@
 # LLM Configuration
 llm:
   base_url: "http://localhost:11434"  # Ollama default
-  model: "llama3.2-vision:latest"     # Use LLaMA 3.2 Vision model
+  model: "llama3.2-vision:11b"        # Use LLaMA 3.2 Vision model (11b variant)
   temperature: 0.1                    # Low temperature for consistency
   max_tokens: 512                     # Reasonable response length
   timeout: 30                         # 30 second timeout

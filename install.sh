@@ -20,41 +20,47 @@ source venv/bin/activate
 # Install dependencies
 echo "📥 Installing dependencies..."
 pip install --upgrade pip
-pip install -r requirements_macos.txt
+pip install -r requirements.txt
 
-# Create global command
+# Initialize database
+echo "🗄️  Initializing database..."
+python3 -m orca.database.init_db
+
+# Create global command wrapper
 echo "🔧 Creating global command..."
-sudo ln -sf "$ORCA_DIR/orca_os.py" /usr/local/bin/orca-os
-sudo chmod +x /usr/local/bin/orca-os
-
-# Create desktop shortcut
-echo "🖥️  Creating desktop integration..."
-mkdir -p ~/Applications
-cat > ~/Applications/Orca\ OS.app/Contents/MacOS/orca-os << EOF
+cat > /tmp/orca-wrapper.sh << EOF
 #!/bin/bash
 cd "$ORCA_DIR"
 source venv/bin/activate
-python orca_os.py
+python3 -m orca.cli "\$@"
 EOF
 
-chmod +x ~/Applications/Orca\ OS.app/Contents/MacOS/orca-os
+sudo mv /tmp/orca-wrapper.sh /usr/local/bin/orca
+sudo chmod +x /usr/local/bin/orca
 
 # Create configuration
 echo "⚙️  Setting up configuration..."
 mkdir -p ~/.orca
-cp config/orca.yaml ~/.orca/
+if [ ! -f ~/.orca/orca.yaml ]; then
+    cp config/orca.yaml ~/.orca/ 2>/dev/null || echo "⚠️  Config file not found, using defaults"
+fi
 
 echo ""
 echo "🎉 Orca OS installation complete!"
 echo ""
 echo "🚀 How to use:"
-echo "  • Interactive mode: orca-os"
-echo "  • Single command: orca-os 'show me disk usage'"
-echo "  • Desktop app: Open 'Orca OS' from Applications"
+echo "  • Interactive mode: orca --interactive"
+echo "  • Single command: orca 'show me disk usage'"
+echo "  • Health check: orca 'show health score'"
+echo "  • Organize files: orca 'organize my downloads'"
 echo ""
 echo "💡 Examples:"
-echo "  orca-os 'find large files on my computer'"
-echo "  orca-os 'check if my computer is running slowly'"
-echo "  orca-os 'show me what programs are running'"
+echo "  orca 'show me disk usage'"
+echo "  orca 'show health score'"
+echo "  orca 'organize my downloads'"
+echo "  orca 'show my usage patterns'"
+echo "  orca 'optimize my system'"
+echo ""
+echo "📚 Documentation: See docs/QUICK_START_GUIDE.md"
 echo ""
 echo "🐋 Welcome to Orca OS - Your AI Operating System!"
