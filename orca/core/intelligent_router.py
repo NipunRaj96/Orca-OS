@@ -70,6 +70,11 @@ class IntelligentRouter:
                 r'organize|organise|organize.*file|organize.*folder|organize.*directory',
                 r'organize.*download|organize.*desktop|clean.*folder|sort.*file',
                 r'file.*organization|folder.*organization|tidy.*folder',
+            ],
+            'email': [
+                r'email|mail|send.*email|write.*email|compose.*email',
+                r'gmail|send.*mail|email.*to|mail.*to',
+                r'write.*to|send.*to|email.*message',
             ]
         }
     
@@ -147,6 +152,9 @@ class IntelligentRouter:
             elif feature == 'autonomous_fix':
                 # This triggers automatic fixing
                 results['autonomous_fix'] = await self._run_autonomous_fix(query, integration_layer)
+            
+            elif feature == 'email':
+                results['email'] = await self._run_email(query, integration_layer)
         
         return results
     
@@ -623,5 +631,144 @@ class IntelligentRouter:
             return {
                 'status': 'error',
                 'error': str(e)
+            }
+    
+    async def _run_email(self, query: str, integration_layer) -> Dict[str, Any]:
+        """Run email sending via Gmail MCP."""
+        try:
+            from orca.features.mcp.client import GmailMCPClient
+            from orca.features.mcp.server_registry import MCPServerRegistry
+            import re
+            
+            # Initialize MCP registry and Gmail client
+            registry = MCPServerRegistry()
+            
+            # Check if Gmail is already registered
+            gmail_client = registry.get_server('gmail')
+            if not gmail_client:
+                # Register Gmail server
+                gmail_client = GmailMCPClient()
+                if not gmail_client.connect():
+                    return {
+                        'status': 'error',
+                        'message': 'Failed to connect to Gmail. Please check credentials at ~/.orca/gmail_credentials.json'
+                    }
+                registry.servers['gmail'] = gmail_client
+            
+            # Parse email from natural language query
+            # Extract recipient
+            recipient_patterns = [
+                r'to\s+([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',  # email@domain.com
+                r'email\s+to\s+([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+                r'send\s+to\s+([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+                r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',  # Just email address
+            ]
+            
+            recipient = None
+            for pattern in recipient_patterns:
+                match = re.search(pattern, query, re.IGNORECASE)
+                if match:
+                    recipient = match.group(1)
+                    break
+            
+            # Extract subject (if mentioned)
+            subject_patterns = [
+                r'subject[:\s]+([^,\.]+)',
+                r'about[:\s]+([^,\.]+)',
+                r'regarding[:\s]+([^,\.]+)',
+            ]
+            
+            subject = None
+            for pattern in subject_patterns:
+                match = re.search(pattern, query, re.IGNORECASE)
+                if match:
+                    subject = match.group(1).strip()
+                    break
+            
+            # Extract body/content
+            body_patterns = [
+                r'with\s+body\s+(.+?)(?:\.|$)',
+                r'body[:\s]+(.+?)(?:\.|$)',
+                r'that\s+(.+?)(?:\.|$)',
+                r'about\s+(.+?)(?:\.|$)',
+                r'saying\s+(.+?)(?:\.|$)',
+                r'with\s+message[:\s]+(.+?)(?:\.|$)',
+            ]
+            
+            body = None
+            for pattern in body_patterns:
+                match = re.search(pattern, query, re.IGNORECASE)
+                if match:
+                    body = match.group(1).strip()
+                    break
+            
+            # If no body found, use the query itself (minus email parts)
+            if not body:
+                # Remove email address and common phrases
+                body = query
+                if recipient:
+                    body = body.replace(recipient, '')
+                body = re.sub(r'\b(to|email|send|write|mail|with\s+body)\b', '', body, flags=re.IGNORECASE)
+                body = body.strip()
+            
+            # Default subject if not found
+            if not subject:
+                subject = "Message from Orca OS"
+            
+            # If no recipient, return error
+            if not recipient:
+                return {
+                    'status': 'error',
+                    'message': 'Could not find recipient email address. Please specify: "email to user@example.com that ..."'
+                }
+            
+            # Display what will be sent
+            logger.info(f"Preparing to send email to {recipient}")
+            logger.info(f"Subject: {subject}")
+            logger.info(f"Body: {body[:100]}...")
+            
+            # Send email
+            result = gmail_client.call_tool('send_email', {
+                'to': recipient,
+                'subject': subject,
+                'body': body
+            })
+            
+            if result.get('success'):
+                return {
+                    'status': 'success',
+                    'message': result.get('message', f'Email sent successfully to {recipient}'),
+                    'message_id': result.get('message_id'),
+                    'recipient': recipient,
+                    'subject': subject,
+                    'body': body
+                }
+            else:
+                error_msg = result.get('error', 'Failed to send email')
+                # Check if it's an auth error
+                if 'authorize' in error_msg.lower() or 'visit' in error_msg.lower():
+                    return {
+                        'status': 'auth_required',
+                        'message': error_msg,
+                        'recipient': recipient,
+                        'subject': subject,
+                        'body': body
+                    }
+                return {
+                    'status': 'error',
+                    'message': error_msg
+                }
+                
+        except ImportError as e:
+            logger.error(f"Gmail MCP import error: {e}")
+            return {
+                'status': 'error',
+                'message': 'Gmail MCP not available. Install: pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client'
+            }
+        except Exception as e:
+            logger.error(f"Email error: {e}")
+            return {
+                'status': 'error',
+                'message': f'Failed to send email: {str(e)}'
             }
 

@@ -611,6 +611,13 @@ def _display_advanced_results(feature_results: Dict[str, Any], route_info: Dict[
         elif feature == 'autonomous_fix':
             actions = result.get('optimizations_applied', [])
             details = f"Fixed {len(actions)} issues autonomously"
+        elif feature == 'email':
+            if result.get('status') == 'success':
+                details = f"Email sent to {result.get('recipient', 'recipient')}"
+            elif result.get('status') == 'auth_required':
+                details = "Authentication required - check console for URL"
+            else:
+                details = result.get('message', 'Email operation')
         else:
             details = result.get('action', 'Completed')
         
@@ -627,6 +634,8 @@ def _display_advanced_results(feature_results: Dict[str, Any], route_info: Dict[
             _display_optimizations(result['recommendations'])
         elif feature == 'autonomous_fix':
             _display_autonomous_fix_details(result)
+        elif feature == 'email':
+            _display_email_result(result)
     
     return output_buffer.getvalue()
 
@@ -714,6 +723,37 @@ def _display_autonomous_summary(feature_results: Dict[str, Any], capture_func=No
         ))
     
     return output_buffer.getvalue()
+
+
+def _display_email_result(result: Dict[str, Any]):
+    """Display email sending result."""
+    from rich.panel import Panel
+    
+    if result.get('status') == 'success':
+        console.print(Panel(
+            f"[green]✅ Email Sent Successfully![/green]\n\n"
+            f"[cyan]To:[/cyan] {result.get('recipient')}\n"
+            f"[cyan]Subject:[/cyan] {result.get('subject')}\n"
+            f"[cyan]Message ID:[/cyan] {result.get('message_id', 'N/A')}",
+            title="📧 Email Status",
+            border_style="green"
+        ))
+    elif result.get('status') == 'auth_required':
+        console.print(Panel(
+            f"[yellow]⚠️  Gmail Authentication Required[/yellow]\n\n"
+            f"[white]{result.get('message', 'Please authorize Gmail access')}[/white]\n\n"
+            f"[cyan]After authorization, the email will be sent to:[/cyan] {result.get('recipient')}\n"
+            f"[cyan]Subject:[/cyan] {result.get('subject')}",
+            title="🔐 Authentication",
+            border_style="yellow"
+        ))
+    else:
+        console.print(Panel(
+            f"[red]❌ Failed to send email[/red]\n\n"
+            f"[white]{result.get('message', 'Unknown error')}[/white]",
+            title="📧 Email Error",
+            border_style="red"
+        ))
 
 
 def _display_autonomous_fix_details(result: Dict[str, Any]):
